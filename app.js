@@ -1,4 +1,6 @@
-// BUDGET CONTROLLER
+
+            
+           // BUDGET CONTROLLER
 var budgetController = (function() {
     
     var Expense = function(id, description, value) {
@@ -133,7 +135,27 @@ var budgetController = (function() {
         
         testing: function() {
             console.log(data);
-        }
+        },
+
+        storedData: function() {
+            localStorage.setItem("data", JSON.stringify(data));
+        },
+        
+        deleteData: function() {
+            localStorage.removeItem("data");
+        },
+
+        getStoredData: function() {
+            localData = JSON.parse(localStorage.getItem("data"));
+            return localData;
+        },
+
+        updateData: function(storedData) {
+            data.totals = storedData.totals;
+            data.budget = storedData.budget;
+            data.percentage = storedData.percentage;
+        },
+
     };
     
 })();
@@ -257,6 +279,8 @@ var UIController = (function() {
             };
             
         },
+
+
         
         
         displayPercentages: function(percentages) {
@@ -307,6 +331,7 @@ var UIController = (function() {
         getDOMstrings: function() {
             return DOMstrings;
         }
+
     };
     
 })();
@@ -369,6 +394,8 @@ var controller = (function(budgetCtrl, UICtrl) {
             updateBudget();
             
             updatePercentages();
+
+            budgetCtrl.storedData();
         }
     };
     
@@ -391,6 +418,33 @@ var controller = (function(budgetCtrl, UICtrl) {
             updateBudget();
             
             updatePercentages();
+
+            budgetCtrl.storedData();
+        }
+    };
+
+    var loadData = function() {
+        var storedData, newIncItem, newExpItem;
+
+        storedData = budgetCtrl.getStoredData();
+
+        if(storedData) {
+            budgetCtrl.updateData(storedData);
+
+            storedData.allItems.inc.forEach(function(cur) {
+                newIncItem = budgetCtrl.addItem("inc", cur.description, cur.value)
+                UICtrl.addListItem(newIncItem, "inc");
+            });
+
+            storedData.allItems.exp.forEach(function(cur){
+                newExpItem = budgetCtrl.addItem("exp", cur.description, cur.value)
+                UICtrl.addListItem(newExpItem, "exp");
+            });
+
+            budget = budgetCtrl.getBudget();
+            UICtrl.displayBudget(budget);
+
+            updatePercentages();
         }
     };
     
@@ -406,6 +460,7 @@ var controller = (function(budgetCtrl, UICtrl) {
                 percentage: -1
             });
             setupEventListeners();
+            loadData();
         }
     };
     
